@@ -5,13 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.*;
 
 import com.analog.lyric.dimple.model.core.FactorGraph;
 import com.analog.lyric.dimple.model.domains.DiscreteDomain;
 import com.analog.lyric.dimple.model.variables.Discrete;
-import com.analog.lyric.dimple.solvers.gibbs.GibbsSolver;
-import com.analog.lyric.dimple.solvers.gibbs.ISolverVariableGibbs;
 import com.analog.lyric.dimple.solvers.gibbs.SDiscreteVariable;
 import com.analog.lyric.dimple.solvers.gibbs.SFactorGraph;
 import com.google.gson.Gson;
@@ -22,7 +19,7 @@ public class ClueHarness {
 
 	public static void main(String [] args) throws IOException
 	{
-		try(Writer writer = new OutputStreamWriter(new FileOutputStream("DimpleHMMOutput.json"))){
+		try(Writer writer = new OutputStreamWriter(new FileOutputStream("../streamgraph/dimple.json"))){
 			Gson gson = new GsonBuilder().create();
 			Sample sample = new Sample(7);
 			int [] data = new int [7];
@@ -68,15 +65,22 @@ public class ClueHarness {
 			SFactorGraph sHMM = HMM.setSolverFactory(new com.analog.lyric.dimple.solvers.gibbs.Solver());
 			sHMM.saveAllSamples();
 
-			sHMM.setInitialTemperature(10);
-			sHMM.setTemperingHalfLifeInSamples(200);
+			sHMM.setNumSamples(500);
+
+			
+			sHMM.setInitialTemperature(1);
+			
+			sHMM.setSeed(25053);
+			
+			sHMM.burnIn(0);
+			sHMM.setBurnInScans(1);
 			
 			HMM.initialize();
 
 			for (int i=0;i<500;i++)
 			{	
 			
-				HMM.getSolver().iterate(20);
+				HMM.getSolver().iterate(1);
 				
 				data[0]=(int) ((SDiscreteVariable) MondayWeather.getSolver()).getCurrentSampleIndex();
 				data[1]=(int) ((SDiscreteVariable) TuesdayWeather.getSolver()).getCurrentSampleIndex();
@@ -86,6 +90,15 @@ public class ClueHarness {
 				data[5]=(int) ((SDiscreteVariable) SaturdayWeather.getSolver()).getCurrentSampleIndex();
 				data[6]=(int) ((SDiscreteVariable) SundayWeather.getSolver()).getCurrentSampleIndex();
 
+				if (i==50) sHMM.setTemperature(100);
+				if (i==100) sHMM.setTemperature(50);
+				if (i==150) sHMM.setTemperature(25);
+				if (i==200) sHMM.setTemperature(12.5);
+				if (i==250) sHMM.setTemperature(6.25);
+				if (i==300) sHMM.setTemperature(3.125);
+				if (i==350) sHMM.setTemperature(1.575);
+				if (i==400) sHMM.setTemperature(1);
+				
 				likelihoods[0]=(double) ((SDiscreteVariable) MondayWeather.getSolver()).getCurrentSampleScore();
 				likelihoods[1]=(double) ((SDiscreteVariable) TuesdayWeather.getSolver()).getCurrentSampleScore();
 				likelihoods[2]=(double) ((SDiscreteVariable) WednesdayWeather.getSolver()).getCurrentSampleScore();
@@ -107,7 +120,12 @@ public class ClueHarness {
 
 			}
 			
+			sHMM.disableTempering();
+			sHMM.setTemperature(1);
+			
 			// Use the save all samples thing here
+			
+			HMM.initialize();
 			
 			sHMM.setNumSamples(500);
 			sHMM.saveAllSamples();
