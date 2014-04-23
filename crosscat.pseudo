@@ -1,0 +1,12 @@
+Create Beta Priors for each possible combination (ROWS by COLUMNS)
+
+OR
+
+Create a number of beta priors that move around and are attached to columns
+
+THis becomes real beta hyperparameters hooked up through a beta distribution to the data elements through a multiplexer.
+
+Therefore, we could either hook up the hyperparameters with a hard equals or a soft equals I suppose.
+
+Hyperparameters go to a particular
+
