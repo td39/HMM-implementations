@@ -48,12 +48,13 @@ public class ExtendedChimpleProgram extends ChimpleProgram {
 
 
 			// Factor - between two days
-			// If it's sunny (no rain) these are the probabilities of going for a walk, cooking, and reading.
+			// If it's sunny (no rain) these are the probabilities of 
+			// going for a walk (0), cooking (1), and reading (2).
 			weightRef[0][0]=.7;
 			weightRef[0][1]=.2;
 			weightRef[0][2]=.1;
 
-			// If it's rainy, these are the same probabilities in the domain
+			// If it's rainy, these are the probabilities in said domain
 			weightRef[1][0]=.2;
 			weightRef[1][1]=.4;
 			weightRef[1][2]=.4;
@@ -62,33 +63,20 @@ public class ExtendedChimpleProgram extends ChimpleProgram {
 			// Flip a coin to see if it rains
 			days[0] =chimpFlip("day0",.3);
 
-			// Set each weight to the appropriate reference weight
-			for (int i=0; i<3; i++) weight[i]=weightRef[days[0]][i];
-
-			actChoice[0]=chimpDiscrete("act0",weight,samples);
-
-
 			for (int i=1; i<7; i++) {
-				
-				// This is the factor
-				if (days[i-1]==1)
-				{
-					rainWeight=.5;
-				}
-				else
-				{
-					rainWeight=.2;
-				}
+				// This is the transition factor
+				if (days[i-1]==1){rainWeight=.5;}
+				else {rainWeight=.2;}
 				days[i] = chimpFlip("day"+i,rainWeight);
-				
-				for (int j=0; j<3; j++) weight[j] = weightRef[days[i]][j];
-
-				actChoice[i]=chimpDiscrete("act"+i,weight,samples);
 			}
 
 			//Observation likelihoods
 			//day 1 walked
-			likelihoods[0]=-Math.log(weightRef[days[0]][0]/(weightRef[0][0]+weightRef[1][0]));
+			likelihoods[0]=-Math.log(weightRef[days[0]][0]);
+			
+			
+			
+			
 			//day 2 walked
 			likelihoods[1]=-Math.log(weightRef[days[1]][0]/(weightRef[0][0]+weightRef[1][0]));
 			//day 3 cooked
@@ -102,34 +90,15 @@ public class ExtendedChimpleProgram extends ChimpleProgram {
 			//day 7 read
 			likelihoods[6]=-Math.log(weightRef[days[6]][2]/(weightRef[0][2]+weightRef[1][2]));
 
-			// Condition
-			for (int i=0;i<7;i++) addCost(likelihoods[i]);
-
-
-			//Define rain likelihoods
-			double firstL = .7*(1-days[0])+days[0]*.3;
 			
+
+
+			//Define rain likelihoods for the first day
+			double firstL = .7*(1-days[0])+days[0]*.3;
+		
 			// Condition
+			for (int i=0;i<40;i++) addCost(likelihoods[i]);
 			addCost(-Math.log(firstL));
-
-			this.
-
-			// Day to day likelihoods
-//			double [][] rainL = new double [2][2];
-//			double [][] rainLNorm = new double [2][2];
-//
-//			rainL[1][0]=.5;
-//			rainL[0][1]=.2;
-//			rainL[1][1]=.8;
-//			rainL[0][0]=.5;
-//
-//			rainLNorm[1][0]=.5/(.5+.8);
-//			rainLNorm[0][1]=.2/(.2+.5);
-//			rainLNorm[1][1]=.8/(.5+.8);
-//			rainLNorm[0][0]=.5/(.2+.5);
-
-
-			//for (int i=1;i<7;i++) addCost(-Math.log(rainLNorm[days[i-1]][days[i]]));
 
 			//record a sample and send it to output
 			counter++;
@@ -139,12 +108,11 @@ public class ExtendedChimpleProgram extends ChimpleProgram {
 				// Save best samples				
 				bestSample=(int [])this.getResult();
 				for (int i=0;i<7;i++) likelihoods[i]=(double)this.getLikelihood();
-				sample.setLikelihoods(likelihoods);
 				sample.setData(bestSample);
 				
 				// Save all samples
 				//sample.setData(days);
-				//sample.setLikelihoods(likelihoods);
+				sample.setLikelihoods(likelihoods);
 				
 				System.out.println(sample.setCost(this.getLikelihood()));
 				gson.toJson(sample,writer);
