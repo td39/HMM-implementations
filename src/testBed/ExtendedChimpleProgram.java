@@ -34,10 +34,8 @@ public class ExtendedChimpleProgram extends ChimpleProgram {
 
 			int [] days = new int[7];
 			int [] bestSample = new int[7];
-			double [] weight = new double[3];
 			double rainWeight;
 			Object [] samples= new Object[3];
-			Object [] actChoice= new Object[7];
 			double [][] weightRef = new double[2][3];
 			double [] likelihoods = new double[7];
 
